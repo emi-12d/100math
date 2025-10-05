@@ -10,8 +10,10 @@ parser.add_argument('arg2', help='桁数')
 args = parser.parse_args() 
 print(args.arg1)
 print(args.arg2)
+operator=args.arg1
+digits=int(args.arg2)
 
-generator.generate_pdf(args.arg1, args.arg2)
+generator.generate_pdf(operator, digits)
 
   
 
