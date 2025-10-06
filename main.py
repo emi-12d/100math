@@ -1,19 +1,30 @@
 import argparse
 import generator
+import sys
 
-parser = argparse.ArgumentParser(description='100マス計算')    # 2. パーサを作る
+# パーサを作る
+parser = argparse.ArgumentParser(description='100マス計算')
 
-# 3. parser.add_argumentで受け取る引数を追加していく
-parser.add_argument('arg1', help='演算子の指定')    # 必須の引数を追加
-parser.add_argument('arg2', help='桁数')
+# 必須の位置引数を2つ定義
+# これらは指定しないと自動でエラーになる
+parser.add_argument('operator', help='演算子 (+, -, *, /) を指定')
+parser.add_argument('digits', type=int, help='計算に使う数字の桁数を指定')
 
-args = parser.parse_args() 
-print(args.arg1)
-print(args.arg2)
-operator=args.arg1
-digits=int(args.arg2)
+# 引数をパース
+# ここで引数が足りなければ、argparseが自動でエラーを出して終了する
+args = parser.parse_args()
+
+operator = args.operator
+digits = args.digits
+
+# 念のため、演算子の種類をチェックする処理を追加
+allowed_operators = ['+', '-', '*', '/']
+if operator not in allowed_operators:
+    print(f"エラー: 演算子 '{operator}' は無効です。", file=sys.stderr)
+    print(f"許可されている演算子: {', '.join(allowed_operators)}", file=sys.stderr)
+    sys.exit(1) # エラーで終了
+
+print(f"演算子: {operator}")
+print(f"桁数: {digits}")
 
 generator.generate_pdf(operator, digits)
-
-  
-
