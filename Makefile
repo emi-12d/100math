@@ -1,4 +1,7 @@
 .PHONY: sample
 
 sample:
-	python main.py "+" 6
+	python main.py "+" 4
+
+clearPDF:
+	rm -rf *.pdf

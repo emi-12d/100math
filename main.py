@@ -26,7 +26,7 @@ if operator not in allowed_operators:
 
 # 桁数が5以上の場合にエラーを出す
 if digits >= 5:
-    print("エラー: 4桁までの整数で入力してください。", file=sys.stderr)
+    print("エラー: 4桁までの整数のみに対応しています。\ndigitには4以下の数値を入力してください。\nExample : `python main.py \"+\" 4`", file=sys.stderr)
     sys.exit(1) # エラーで終了
 
 print(f"演算子: {operator}")
