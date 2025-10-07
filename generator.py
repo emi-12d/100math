@@ -60,20 +60,56 @@ def generate_pdf(operator='+', digits=1):
     # --- 問題の数字を生成 ---
     min_val = 1 if digits == 1 else 10**(digits - 1)
     max_val = (10**digits) - 1
+    
+    # 重複しないように数字を生成するロジック
+    # 母集団から10個のユニークな数字を選ぶ事で数字の重複を防ぐ
+    population = range(min_val, max_val + 1)
+    # ユニークな数字を10個以上作れるか判定(1桁の場合などは不可能であるため)
+    can_be_unique = len(population) >= 10
 
-    top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+    top_numbers = []
     left_numbers = []
 
     if operator in ['+', '*']:
-        left_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+        if can_be_unique:
+            top_numbers = random.sample(population, 10)
+            left_numbers = random.sample(population, 10)
+        else:
+            # 1桁の場合など、ユニークな数字を10個作れない場合は重複を許容
+            top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+            left_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+
     elif operator == '-':
-        left_numbers = [num + random.randint(min_val, max_val) for num in top_numbers]
-        random.shuffle(left_numbers)
+        if can_be_unique:
+            top_numbers = random.sample(population, 10)
+        else:
+            top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+        
+        # left_numbersがユニークになるように生成
+        temp_left = []
+        while len(temp_left) < 10:
+            # top_numbersの各要素に対して、それより大きい数を生成
+            num = top_numbers[len(temp_left)] + random.randint(min_val, max_val)
+            if num not in temp_left:
+                temp_left.append(num)
+        left_numbers = temp_left
+        random.shuffle(left_numbers) # 順番をシャッフルして関連性をなくす
+
     elif operator == '/':
-        # 注: このわり算のロジックでは、答えが整数にならない組み合わせが生成されることがあります。
-        # 解答PDFでは、小数点第2位までの近似値が記載されます。
+        if can_be_unique:
+            top_numbers = random.sample(population, 10)
+        else:
+            top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+
         answers_for_gen = [random.randint(1, 9) for _ in range(10)]
-        left_numbers = [t * a for t, a in zip(top_numbers, answers_for_gen)]
+        
+        # left_numbersがユニークになるように生成
+        temp_left = []
+        while len(temp_left) < 10:
+            num = top_numbers[len(temp_left)] * answers_for_gen[len(temp_left)]
+            if num not in temp_left:
+                temp_left.append(num)
+        left_numbers = temp_left
         random.shuffle(left_numbers)
 
     # --- 全ての解答を先に計算 ---
@@ -140,6 +176,8 @@ def generate_pdf(operator='+', digits=1):
                     if isinstance(ans, float) and not ans.is_integer():
                          # 小数点以下が長くなりすぎないように丸める
                         ans_str = f"{ans:.2f}".rstrip('0').rstrip('.')
+                    elif isinstance(ans, str):
+                        ans_str = ans
                     else:
                         ans_str = str(int(ans))
                     
@@ -172,3 +210,4 @@ if __name__ == '__main__':
     
     # 割る数が2桁の割り算
     generate_pdf(operator='/', digits=2)
+
