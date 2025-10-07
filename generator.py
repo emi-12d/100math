@@ -3,7 +3,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import random
-import math
+import os
 
 def generate_pdf(operator='+', digits=1):
     """
@@ -40,10 +40,13 @@ def generate_pdf(operator='+', digits=1):
     width, height = A4
 
     try:
-        pdfmetrics.registerFont(TTFont('IPAexGothic', 'ipaexg.ttf'))
+        # フォントファイルのパスを正しく指定
+        font_path = os.path.join('ipaexg00102', 'ipaexg.ttf')
+        pdfmetrics.registerFont(TTFont('IPAexGothic', font_path))
         font_name = 'IPAexGothic'
     except Exception as e:
-        print("警告: フォントファイル 'ipaexg.ttf' が見つかりません。")
+        # 警告メッセージも分かりやすく修正
+        print(f"警告: フォントファイル '{font_path}' が見つかりません。")
         font_name = "Helvetica"
 
     # --- 桁数に応じたレイアウト調整 (A4幅に収まるように修正済み) ---
