@@ -5,13 +5,11 @@ from reportlab.pdfbase.ttfonts import TTFont
 import random
 import os
 
-def generate_pdf(operator='+', digits=1):
+def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='+', left_digits=1, top_digits=1):
     """
-    指定された四則演算と桁数で、問題と解答の100ます計算PDFを2種類生成する関数
-
-    Args:
-        operator (str): 演算子 ('+', '-', '*', '/')
-        digits (int): 問題の数字の桁数 (例: 1, 2, 3)
+    指定された四則演算と桁数で、桁数の違う数字の演算ができる100ます計算PDFを生成する
+    left_digits: 左側の数字の桁数
+    top_digits: 上側の数字の桁数
     """
     # --- 基本設定 ---
     settings = {
@@ -23,14 +21,14 @@ def generate_pdf(operator='+', digits=1):
     if operator not in settings:
         print(f"エラー: 対応していない演算子です -> '{operator}'")
         return
-    if not isinstance(digits, int) or digits < 1:
-        print(f"エラー: 桁数は1以上の整数で指定してください -> '{digits}'")
+    if not (isinstance(left_digits, int) and left_digits >= 1 and isinstance(top_digits, int) and top_digits >= 1):
+        print(f"エラー: 桁数は1以上の整数で指定してください -> 左:{left_digits}, 上:{top_digits}")
         return
 
     setting = settings[operator]
     
     # --- ファイル名設定 ---
-    base_filename = f"hyakumasu_{setting['title']}_{digits}keta"
+    base_filename = f"hyakumasu_{setting['title']}_{left_digits}x{top_digits}keta"
     problem_filename = f"{base_filename}.pdf"
     answer_filename = f"{base_filename}_ans.pdf"
 
@@ -40,20 +38,19 @@ def generate_pdf(operator='+', digits=1):
     width, height = A4
 
     try:
-        # フォントファイルのパスを正しく指定
         font_path = os.path.join('ipaexg00102', 'ipaexg.ttf')
         pdfmetrics.registerFont(TTFont('IPAexGothic', font_path))
         font_name = 'IPAexGothic'
-    except Exception as e:
-        # 警告メッセージも分かりやすく修正
+    except Exception:
         print(f"警告: フォントファイル '{font_path}' が見つかりません。")
         font_name = "Helvetica"
 
-    # --- 桁数に応じたレイアウト調整 (A4幅に収まるように修正済み) ---
-    if digits <= 1:
+    # --- 桁数に応じたレイアウト調整 (大きい方の桁数に合わせる) ---
+    max_digits = max(left_digits, top_digits)
+    if max_digits <= 1:
         grid_size = 40
         font_size = 16
-    elif digits == 2:
+    elif max_digits == 2:
         grid_size = 48
         font_size = 14
     else: # 3桁以上
@@ -61,109 +58,61 @@ def generate_pdf(operator='+', digits=1):
         font_size = 12
     
     # --- 問題の数字を生成 ---
-    min_val = 1 if digits == 1 else 10**(digits - 1)
-    max_val = (10**digits) - 1
-    
-    # 重複しないように数字を生成するロジック
-    # 母集団から10個のユニークな数字を選ぶ事で数字の重複を防ぐ
-    population = range(min_val, max_val + 1)
-    # ユニークな数字を10個以上作れるか判定(1桁の場合などは不可能であるため)
-    can_be_unique = len(population) >= 10
-
-    top_numbers = []
-    left_numbers = []
-
-    if operator in ['+', '*']:
-        if can_be_unique:
-            top_numbers = random.sample(population, 10)
-            left_numbers = random.sample(population, 10)
+    def get_numbers(digits):
+        min_val = 1 if digits == 1 else 10**(digits - 1)
+        max_val = (10**digits) - 1
+        population = range(min_val, max_val + 1)
+        if len(population) >= 10:
+            return random.sample(population, 10)
         else:
-            # 1桁の場合など、ユニークな数字を10個作れない場合は重複を許容
-            top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
-            left_numbers = [random.randint(min_val, max_val) for _ in range(10)]
+            return [random.randint(min_val, max_val) for _ in range(10)]
 
-    elif operator == '-':
-        if can_be_unique:
-            top_numbers = random.sample(population, 10)
-        else:
-            top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
-        
-        # left_numbersがユニークになるように生成
-        temp_left = []
-        while len(temp_left) < 10:
-            # top_numbersの各要素に対して、それより大きい数を生成
-            num = top_numbers[len(temp_left)] + random.randint(min_val, max_val)
-            if num not in temp_left:
-                temp_left.append(num)
-        left_numbers = temp_left
-        random.shuffle(left_numbers) # 順番をシャッフルして関連性をなくす
+    left_numbers = get_numbers(left_digits)
+    top_numbers = get_numbers(top_digits)
 
+    # 引き算と割り算の特別ロジック
+    if operator == '-':
+        # left_numbers が top_numbers より大きくなるように調整
+        min_val_b = 1 if top_digits == 1 else 10**(top_digits - 1)
+        max_val_b = (10**top_digits) - 1
+        left_numbers = [num + random.randint(min_val_b, max_val_b) for num in top_numbers]
+        random.shuffle(left_numbers)
     elif operator == '/':
-        if can_be_unique:
-            top_numbers = random.sample(population, 10)
-        else:
-            top_numbers = [random.randint(min_val, max_val) for _ in range(10)]
-
         answers_for_gen = [random.randint(1, 9) for _ in range(10)]
-        
-        # left_numbersがユニークになるように生成
-        temp_left = []
-        while len(temp_left) < 10:
-            num = top_numbers[len(temp_left)] * answers_for_gen[len(temp_left)]
-            if num not in temp_left:
-                temp_left.append(num)
-        left_numbers = temp_left
+        left_numbers = [t * a for t, a in zip(top_numbers, answers_for_gen)]
         random.shuffle(left_numbers)
 
     # --- 全ての解答を先に計算 ---
     answers = [[0 for _ in range(10)] for _ in range(10)]
     for i in range(10):
         for j in range(10):
-            l_num = left_numbers[i]
-            t_num = top_numbers[j]
-            if operator == '+':
-                answers[i][j] = l_num + t_num
-            elif operator == '-':
-                answers[i][j] = l_num - t_num
-            elif operator == '*':
-                answers[i][j] = l_num * t_num
-            elif operator == '/':
-                if t_num != 0:
-                    answers[i][j] = l_num / t_num
-                else:
-                    answers[i][j] = " - " # ゼロ除算エラー防止
+            l_num, t_num = left_numbers[i], top_numbers[j]
+            if operator == '+': answers[i][j] = l_num + t_num
+            elif operator == '-': answers[i][j] = l_num - t_num
+            elif operator == '*': answers[i][j] = l_num * t_num
+            elif operator == '/': answers[i][j] = l_num / t_num if t_num != 0 else " - "
 
-    # --- 描画処理を共通化 ---
+    # --- 描画処理 ---
+    title_str = f"{setting['title']} 100ますけいさん ({left_digits}桁 × {top_digits}桁)"
     canvases = [
-        {'c': c_problem, 'title': f"{setting['title']} 100ますけいさん ({digits}桁)", 'include_answers': False},
-        {'c': c_answer,  'title': f"{setting['title']} 100ますけいさん ({digits}桁) - 解答", 'include_answers': True}
+        {'c': c_problem, 'title': title_str, 'include_answers': False},
+        {'c': c_answer,  'title': f"{title_str} - 解答", 'include_answers': True}
     ]
 
     for canvas_info in canvases:
         c = canvas_info['c']
-        
-        # フォントサイズ設定
         c.setFont(font_name, font_size)
-
-        # ページタイトル
-        title_font_size = 18
-        c.setFont(font_name, title_font_size)
+        c.setFont(font_name, 18)
         c.drawCentredString(width / 2, height - 60, canvas_info['title'])
         c.setFont(font_name, font_size)
 
-        # マス目と数字の描画
         margin_x = (width - grid_size * 11) / 2
-        start_x = margin_x
-        start_y = height - 120
+        start_x, start_y = margin_x, height - 120
 
         for i in range(11):
             for j in range(11):
-                x = start_x + j * grid_size
-                y = start_y - i * grid_size
-                
-                center_x = x + grid_size / 2
-                center_y = y + grid_size / 2 - (font_size / 3)
-
+                x, y = start_x + j * grid_size, start_y - i * grid_size
+                center_x, center_y = x + grid_size / 2, y + grid_size / 2 - (font_size / 3)
                 c.grid([x, x + grid_size], [y, y + grid_size])
 
                 if i == 0 and j == 0:
@@ -172,45 +121,41 @@ def generate_pdf(operator='+', digits=1):
                     c.drawCentredString(center_x, center_y, str(top_numbers[j-1]))
                 elif i > 0 and j == 0:
                     c.drawCentredString(center_x, center_y, str(left_numbers[i-1]))
-                # 解答を描画する場合
                 elif i > 0 and j > 0 and canvas_info['include_answers']:
                     ans = answers[i-1][j-1]
-                    # 答えが小数の場合、フォーマットを調整
+                    ans_str = str(ans)
                     if isinstance(ans, float) and not ans.is_integer():
-                         # 小数点以下が長くなりすぎないように丸める
                         ans_str = f"{ans:.2f}".rstrip('0').rstrip('.')
-                    elif isinstance(ans, str):
-                        ans_str = ans
-                    else:
+                    elif not isinstance(ans, str):
                         ans_str = str(int(ans))
                     
-                    # 答えの桁数に応じてフォントを少し小さくする
                     ans_font_size = font_size
-                    if len(ans_str) > 5:
-                        ans_font_size = font_size - 4
-                    elif len(ans_str) > 3:
-                        ans_font_size = font_size - 2
+                    if len(ans_str) > 5: ans_font_size -= 4
+                    elif len(ans_str) > 3: ans_font_size -= 2
                     
                     c.setFont(font_name, ans_font_size)
                     c.drawCentredString(center_x, center_y, ans_str)
-                    c.setFont(font_name, font_size) # フォントサイズを戻す
-
+                    c.setFont(font_name, font_size)
         c.save()
 
     print(f"'{problem_filename}' と '{answer_filename}' を作成しました。")
 
+def generate_symmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='+', digits=1):
+    """
+    指定された四則演算と桁数で、桁数が同じ問題の100ます計算PDFを生成する関数
+    （内部的に非対称関数を呼び出します）
+    """
+    generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator, left_digits=digits, top_digits=digits)
 
-# --- 関数を実行 ---
+
+# --- 実行例 ---
 if __name__ == '__main__':
-    # 1桁の足し算
-    generate_pdf(operator='+', digits=1)
+    # 【非対称】左2桁、上1桁の足し算
+    generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='+', left_digits=2, top_digits=1)
+
+    # 【非対称】左3桁、上2桁の引き算
+    generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='-', left_digits=3, top_digits=2)
     
-    # 2桁の引き算
-    generate_pdf(operator='-', digits=2)
-    
-    # 2桁の掛け算
-    generate_pdf(operator='*', digits=2)
-    
-    # 割る数が2桁の割り算
-    generate_pdf(operator='/', digits=2)
+    # 【対称】2桁の掛け算 (対称関数を呼び出し)
+    generate_symmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='*', digits=2)
 
