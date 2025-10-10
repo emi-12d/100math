@@ -62,25 +62,17 @@ def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(ope
         min_val = 1 if digits == 1 else 10**(digits - 1)
         max_val = (10**digits) - 1
         population = range(min_val, max_val + 1)
-        if len(population) >= 10:
+        # NOTE: 1桁の場合, 2桁以上の時は重複を無しにしないといけない
+        if digits != 1:
             return random.sample(population, 10)
         else:
-            return [random.randint(min_val, max_val) for _ in range(10)]
+            # NOTE: 0~9の数字を重複なしで並べ替える
+            return random.sample([i for i in range(10)],10)
 
     left_numbers = get_numbers(left_digits)
+    print("left_digits",left_numbers)
     top_numbers = get_numbers(top_digits)
-
-    # 引き算と割り算の特別ロジック
-    if operator == '-':
-        # left_numbers が top_numbers より大きくなるように調整
-        min_val_b = 1 if top_digits == 1 else 10**(top_digits - 1)
-        max_val_b = (10**top_digits) - 1
-        left_numbers = [num + random.randint(min_val_b, max_val_b) for num in top_numbers]
-        random.shuffle(left_numbers)
-    elif operator == '/':
-        answers_for_gen = [random.randint(1, 9) for _ in range(10)]
-        left_numbers = [t * a for t, a in zip(top_numbers, answers_for_gen)]
-        random.shuffle(left_numbers)
+    print("top_digits",top_numbers)
 
     # --- 全ての解答を先に計算 ---
     answers = [[0 for _ in range(10)] for _ in range(10)]
