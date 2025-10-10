@@ -56,6 +56,7 @@ def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(ope
     else: # 3桁以上
         grid_size = 52
         font_size = 12
+    title_font_size = 18
     
     # --- 問題の数字を生成 ---
     def get_numbers(digits):
@@ -94,7 +95,7 @@ def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(ope
     for canvas_info in canvases:
         c = canvas_info['c']
         c.setFont(font_name, font_size)
-        c.setFont(font_name, 18)
+        c.setFont(font_name, title_font_size)
         c.drawCentredString(width / 2, height - 60, canvas_info['title'])
         c.setFont(font_name, font_size)
 
