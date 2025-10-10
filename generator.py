@@ -152,3 +152,6 @@ if __name__ == '__main__':
     # 【対称】2桁の掛け算 (対称関数を呼び出し)
     generate_symmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='*', digits=2)
 
+    # 【対称】2桁の足し算 (対称関数を呼び出し)
+    generate_symmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='+', digits=2)
+
