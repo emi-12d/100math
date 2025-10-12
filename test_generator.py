@@ -2,8 +2,7 @@ from generator import get_numbers
 
 
 def test_get_numbers():
-    """問題生成関数のテスト
-    """
+    """問題生成関数のテスト"""
     problem_list = get_numbers(2)
     # problem_listの要素数が10であること
     assert len(problem_list) == 10
