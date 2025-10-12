@@ -8,3 +8,7 @@ clearPDF:
 
 test:
 	pytest -v .
+
+fmt:
+	black .
+	isort .

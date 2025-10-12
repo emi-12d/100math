@@ -1,2 +1,4 @@
 reportlab
 pytest
+black
+isort
