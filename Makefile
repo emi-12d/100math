@@ -5,3 +5,6 @@ sample:
 
 clearPDF:
 	rm -rf *.pdf
+
+test:
+	pytest -v .
