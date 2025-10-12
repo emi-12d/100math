@@ -5,11 +5,39 @@ from reportlab.pdfbase.ttfonts import TTFont
 import random
 import os
 
-def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator='+', left_digits=1, top_digits=1):
+# --- 問題の数字を生成 ---
+def get_numbers(digits:int) -> list[int]:
+    """問題の数字(指定された桁数の10個の数字)を重複なしで生成する
+
+    Args:
+        digits (int): 生成する数字の桁数
+
+    Returns:
+        list[int]: 10個の数字のリスト
     """
-    指定された四則演算と桁数で、桁数の違う数字の演算ができる100ます計算PDFを生成する
-    left_digits: 左側の数字の桁数
-    top_digits: 上側の数字の桁数
+    min_val = 1 if digits == 1 else 10**(digits - 1)
+    max_val = (10**digits) - 1
+    population = range(min_val, max_val + 1)
+    # NOTE: 1桁の場合, 0~9の数字を重複なしでシャッフルする
+    # それ以外の場合は，母集団の中から日復元抽出することで数字の重複を防ぐ
+    if digits != 1:
+        return random.sample(population, 10)
+    else:
+        return random.sample([i for i in range(10)],10)
+
+
+
+def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator:str='+', left_digits:int=1, top_digits:int=1) -> None:
+    """指定された四則演算と桁数で、桁数の違う数字の演算ができる100ます計算PDFを生成する
+
+    Args:
+        operator (str): 四則演算子 ('+', '-', '*', '/')
+        left_digits (int): 左側の数字の桁数
+        top_digits (int): 上側の数字の桁数
+
+    Returns:
+        None
+
     """
     # --- 基本設定 ---
     settings = {
@@ -58,18 +86,6 @@ def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(ope
         font_size = 12
     title_font_size = 18
     
-    # --- 問題の数字を生成 ---
-    def get_numbers(digits):
-        min_val = 1 if digits == 1 else 10**(digits - 1)
-        max_val = (10**digits) - 1
-        population = range(min_val, max_val + 1)
-        # NOTE: 1桁の場合, 2桁以上の時は重複を無しにしないといけない
-        if digits != 1:
-            return random.sample(population, 10)
-        else:
-            # NOTE: 0~9の数字を重複なしで並べ替える
-            return random.sample([i for i in range(10)],10)
-
     left_numbers = get_numbers(left_digits)
     print("left_digits",left_numbers)
     top_numbers = get_numbers(top_digits)
