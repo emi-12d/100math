@@ -5,3 +5,10 @@ sample:
 
 clearPDF:
 	rm -rf *.pdf
+
+test:
+	pytest -v .
+
+fmt:
+	black .
+	isort .
