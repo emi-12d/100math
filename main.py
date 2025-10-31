@@ -38,4 +38,6 @@ if left_digits >= 5 or top_digits >= 5:
 print(f"演算子: {operator}")
 print(f"桁数: {left_digits, top_digits}")
 
-generator.generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(operator, left_digits, top_digits)
+generator.generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(
+    operator, left_digits, top_digits
+)
