@@ -58,9 +58,7 @@ def generate_asymmetric_number_of_characters_Hundred_Square_Calculations_pdf(
         and isinstance(top_digits, int)
         and top_digits >= 1
     ):
-        print(
-            f"エラー: 桁数は1以上の整数で指定してください -> 左:{left_digits}, 上:{top_digits}"
-        )
+        print(f"エラー: 桁数は1以上の整数で指定してください -> 左:{left_digits}, 上:{top_digits}")
         return
 
     setting = settings[operator]
