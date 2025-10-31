@@ -30,7 +30,7 @@ if operator not in allowed_operators:
 # 桁数が5以上の場合にエラーを出す
 if left_digits >= 5 or top_digits >= 5:
     print(
-        'エラー: 4桁までの整数のみに対応しています。\ndigitには4以下の数値を入力してください。\nExample : `python main.py "+" 4`',
+        'エラー: 4桁までの整数のみ対応しています。\nleft_digitsとtop_figitsには4以下の数値を入力してください。\nExample : `python main.py "+" 2 3`',
         file=sys.stderr,
     )
     sys.exit(1)  # エラーで終了
